@@ -1,18 +1,17 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 
 const app = express();
+const PORT = process.env.PORT || 5000;
+
 app.use(cors());
 app.use(express.json());
 
-// Connect to MongoDB Atlas
-mongoose.connect('mongodb+srv://pratik:Pratik121ffybl@transportportal.s4bwb.mongodb.net/?retryWrites=true&w=majority&appName=TransportPortal', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => console.log('Connected to MongoDB Atlas'))
-.catch(err => console.error('MongoDB connection error:', err));
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
 // Create Transport Schema
 const transportSchema = new mongoose.Schema({
@@ -121,6 +120,6 @@ app.delete('/api/transport/:id', async (req, res) => {
   }
 });
 
-app.listen(5000, () => {
-  console.log('Server running on port 5000');
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 }); 
