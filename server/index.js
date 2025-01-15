@@ -120,6 +120,19 @@ app.delete('/api/transport/:id', async (req, res) => {
   }
 });
 
+app.get('/', (req, res) => {
+  res.json({ message: "Transport Portal API is running" });
+});
+
+app.get('/api/transport', async (req, res) => {
+  try {
+    const transports = await Transport.find().sort({ date: -1 });
+    res.json(transports);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 }); 
