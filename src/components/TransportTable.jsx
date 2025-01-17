@@ -225,6 +225,7 @@ const TransportTable = () => {
     )
   };
 
+  // Define columns array
   const columns = [
     { field: 'date', headerName: 'Date', width: 120, 
       valueFormatter: (params) => dayjs(params.value).format('DD/MM/YYYY') 
