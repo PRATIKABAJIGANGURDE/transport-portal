@@ -18,6 +18,7 @@ import dayjs from 'dayjs';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { DataGrid } from '@mui/x-data-grid';
 
 // Styled components
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -45,7 +46,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 
 const TransportTable = () => {
   const navigate = useNavigate();
-  const [data, setData] = useState([]);
+  const [transportData, setTransportData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [openDialog, setOpenDialog] = useState(false);
@@ -62,7 +63,7 @@ const TransportTable = () => {
   }, []);
 
   useEffect(() => {
-    let filtered = data;
+    let filtered = transportData;
     
     // Apply date range filter
     if (dateRange.start && dateRange.end) {
@@ -82,7 +83,7 @@ const TransportTable = () => {
     }
     
     setFilteredData(filtered);
-  }, [searchTerm, data, dateRange]);
+  }, [searchTerm, transportData, dateRange]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -92,7 +93,7 @@ const TransportTable = () => {
       const sortedData = response.data.sort((a, b) => 
         new Date(b.date) - new Date(a.date)
       );
-      setData(sortedData);
+      setTransportData(sortedData);
       setFilteredData(sortedData);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -116,7 +117,7 @@ const TransportTable = () => {
 
       if (response.data) {
         // Update local state after successful server update
-        const updatedLocalData = data.map(item => {
+        const updatedLocalData = transportData.map(item => {
           if (item._id === row._id) {
             return {
               ...item,
@@ -126,14 +127,14 @@ const TransportTable = () => {
           return item;
         });
 
-        setData(updatedLocalData);
+        setTransportData(updatedLocalData);
         setFilteredData(updatedLocalData);
 
         // Verify update
         const freshDataResponse = await axios.get('http://localhost:5000/api/transport');
         console.log('Fresh data:', freshDataResponse.data);
         
-        setData(freshDataResponse.data);
+        setTransportData(freshDataResponse.data);
         setFilteredData(freshDataResponse.data);
       }
     } catch (error) {
@@ -225,7 +226,7 @@ const TransportTable = () => {
     )
   };
 
-  // Define columns array
+  // Define columns for the DataGrid
   const columns = [
     { field: 'date', headerName: 'Date', width: 120, 
       valueFormatter: (params) => dayjs(params.value).format('DD/MM/YYYY') 
@@ -248,347 +249,25 @@ const TransportTable = () => {
   ];
 
   return (
-    <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
-      {/* Stats Cards */}
-      <Box sx={{ mb: 4, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-        <Paper sx={{ p: 2, flex: 1, minWidth: 200, bgcolor: '#bbdefb' }}>
-          <Typography variant="h6">Total Transactions</Typography>
-          <Typography variant="h4">{stats.total}</Typography>
-        </Paper>
-        
-        <Paper sx={{ p: 2, flex: 1, minWidth: 200, bgcolor: '#c8e6c9' }}>
-          <Typography variant="h6">Paid</Typography>
-          <Typography variant="h4">{stats.paid}</Typography>
-        </Paper>
-        
-        <Paper sx={{ p: 2, flex: 1, minWidth: 200, bgcolor: '#ffcdd2' }}>
-          <Typography variant="h6">Pending</Typography>
-          <Typography variant="h4">{stats.pending}</Typography>
-        </Paper>
-        
-        <Paper sx={{ p: 2, flex: 1, minWidth: 200, bgcolor: '#fff9c4' }}>
-          <Typography variant="h6">Total Balance</Typography>
-          <Typography variant="h4">₹{stats.totalBalance}</Typography>
-        </Paper>
-      </Box>
-
-      <Box sx={{ 
-        mb: 3, 
-        display: 'flex', 
-        flexDirection: { xs: 'column', md: 'row' }, 
-        gap: 2,
-        alignItems: 'center',
-        justifyContent: 'space-between'
-      }}>
-        {/* Left side - Search and Date filters */}
-        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DatePicker
-              label="From Date"
-              value={dateRange.start}
-              onChange={(newValue) => {
-                setDateRange(prev => ({ ...prev, start: newValue }));
-              }}
-              slotProps={{ 
-                textField: { 
-                  size: 'small',
-                  sx: { width: '150px' }
-                } 
-              }}
-            />
-            <DatePicker
-              label="To Date"
-              value={dateRange.end}
-              onChange={(newValue) => {
-                setDateRange(prev => ({ ...prev, end: newValue }));
-              }}
-              slotProps={{ 
-                textField: { 
-                  size: 'small',
-                  sx: { width: '150px' }
-                } 
-              }}
-            />
-          </LocalizationProvider>
-          <Button 
-            variant="outlined" 
-            size="small"
-            onClick={() => setDateRange({ start: null, end: null })}
-          >
-            Clear Dates
-          </Button>
+    <Container maxWidth="lg" sx={{ mt: 4 }}>
+      <Paper elevation={3} sx={{ p: 4 }}>
+        <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="h4">Transport Records</Typography>
+          {/* ... other header content ... */}
         </Box>
 
-        {/* Existing Search Field */}
-        <TextField
-          placeholder="Search..."
-          variant="outlined"
-          size="small"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          sx={{ 
-            minWidth: { xs: '100%', md: '300px' },
-            backgroundColor: 'white'
-          }}
-          InputProps={{
-            startAdornment: <SearchIcon color="action" sx={{ mr: 1 }} />
-          }}
-        />
-
-        {/* Right side - Action buttons */}
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <Button
-            variant="contained"
-            color="secondary"
-            onClick={() => navigate('/')}
-            startIcon={<ArrowBackIcon />}
-          >
-            Back to Form
-          </Button>
-          <Button
-            variant="contained"
-            startIcon={<FileDownloadIcon />}
-            onClick={exportToExcel}
-          >
-            Export
-          </Button>
-          <Button
-            variant="contained"
-            startIcon={<PrintIcon />}
-            onClick={() => window.print()}
-          >
-            Print
-          </Button>
+        <Box sx={{ height: 400, width: '100%' }}>
+          <DataGrid
+            rows={transportData}
+            columns={columns}
+            pageSize={10}
+            rowsPerPageOptions={[10]}
+            getRowId={(row) => row._id}
+            disableSelectionOnClick
+            autoHeight
+          />
         </Box>
-      </Box>
-
-      {error && (
-        <Box sx={{ mb: 2, color: 'error.main' }}>
-          <Typography color="error">{error}</Typography>
-        </Box>
-      )}
-
-      {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
-          <CircularProgress />
-        </Box>
-      ) : (
-        <Paper sx={{ 
-          width: '100%', 
-          overflow: 'hidden',
-          boxShadow: 3,
-          backgroundColor: 'white' 
-        }}>
-          <TableContainer sx={{ 
-            maxHeight: 'calc(100vh - 250px)',
-            overflowX: { xs: 'auto', md: 'hidden' },
-            '&::-webkit-scrollbar': {
-              width: '10px',
-              height: '10px',
-            },
-            '&::-webkit-scrollbar-thumb': {
-              backgroundColor: '#888',
-              borderRadius: '5px',
-            },
-            '&::-webkit-scrollbar-track': {
-              backgroundColor: '#f1f1f1',
-            },
-          }}>
-            <Table stickyHeader size="small">
-              <TableHead>
-                <TableRow>
-                  <StyledTableCell>Date</StyledTableCell>
-                  <StyledTableCell>Vehicle No</StyledTableCell>
-                  <StyledTableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
-                    Driver Name
-                  </StyledTableCell>
-                  <StyledTableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
-                    Driver Mobile
-                  </StyledTableCell>
-                  <StyledTableCell>Place</StyledTableCell>
-                  <StyledTableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
-                    Transport Name
-                  </StyledTableCell>
-                  <StyledTableCell>Rent Amount</StyledTableCell>
-                  <StyledTableCell>Advance</StyledTableCell>
-                  <StyledTableCell>Advance Date</StyledTableCell>
-                  <StyledTableCell>Balance</StyledTableCell>
-                  <StyledTableCell>Status</StyledTableCell>
-                  <StyledTableCell>Balance Date</StyledTableCell>
-                  <StyledTableCell>Actions</StyledTableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {filteredData.map((row) => (
-                  <StyledTableRow key={row._id}>
-                    <TableCell>{dayjs(row.date).format('DD/MM/YYYY')}</TableCell>
-                    <TableCell>{row.vehicleNo}</TableCell>
-                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>{row.driverName}</TableCell>
-                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>{row.driverMobile}</TableCell>
-                    <TableCell>{row.place}</TableCell>
-                    <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>{row.transportName}</TableCell>
-                    <TableCell>{row.rentAmount}</TableCell>
-                    <TableCell>{row.advanceAmount}</TableCell>
-                    <TableCell>{dayjs(row.advanceDate).format('DD/MM/YYYY')}</TableCell>
-                    <TableCell>{row.balanceAmount}</TableCell>
-                    <TableCell>
-                      <Button
-                        variant="contained"
-                        size="small"
-                        color={row.balanceStatus === 'PAID' ? "success" : "warning"}
-                        onClick={() => row.balanceStatus !== 'PAID' && handlePaidClick(row)}
-                        disabled={row.balanceStatus === 'PAID'}
-                        sx={{ 
-                          minWidth: '100px',
-                          backgroundColor: row.balanceStatus === 'PAID' ? '#2e7d32' : '#ed6c02',
-                          '&:disabled': {
-                            backgroundColor: '#2e7d32',
-                            color: 'white'
-                          }
-                        }}
-                      >
-                        {row.balanceStatus === 'PAID' ? "PAID" : "Mark Paid"}
-                      </Button>
-                    </TableCell>
-                    <TableCell>{row.balanceStatus === 'PAID' && row.balanceDate 
-                      ? dayjs(row.balanceDate).format('DD/MM/YYYY')
-                      : '-'}
-                    </TableCell>
-                    <TableCell>
-                      <IconButton 
-                        color="primary" 
-                        onClick={() => handleEditClick(row)}
-                        size="small"
-                      >
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton 
-                        color="error" 
-                        onClick={() => handleDelete(row._id)}
-                        size="small"
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </TableCell>
-                  </StyledTableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Paper>
-      )}
-
-      {/* Edit Dialog */}
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="md" fullWidth>
-        <DialogTitle>Edit Record</DialogTitle>
-        <DialogContent>
-          <Grid container spacing={2} sx={{ mt: 1 }}>
-            <Grid item xs={12} md={6}>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker
-                  label="Date"
-                  value={editData?.date}
-                  onChange={(newValue) => setEditData({ ...editData, date: newValue })}
-                  slotProps={{
-                    textField: { fullWidth: true }
-                  }}
-                />
-              </LocalizationProvider>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Vehicle No"
-                value={editData?.vehicleNo || ''}
-                onChange={(e) => setEditData({ ...editData, vehicleNo: e.target.value })}
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Driver Name"
-                value={editData?.driverName || ''}
-                onChange={(e) => setEditData({ ...editData, driverName: e.target.value })}
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Mobile"
-                value={editData?.driverMobile || ''}
-                onChange={(e) => setEditData({ ...editData, driverMobile: e.target.value })}
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Place"
-                value={editData?.place || ''}
-                onChange={(e) => setEditData({ ...editData, place: e.target.value })}
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Transport"
-                value={editData?.transportName || ''}
-                onChange={(e) => setEditData({ ...editData, transportName: e.target.value })}
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Rent Amount"
-                type="number"
-                value={editData?.rentAmount || ''}
-                onChange={(e) => setEditData({ ...editData, rentAmount: e.target.value })}
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Advance Amount"
-                type="number"
-                value={editData?.advanceAmount || ''}
-                onChange={(e) => setEditData({ ...editData, advanceAmount: e.target.value })}
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker
-                  label="Advance Date"
-                  value={editData?.advanceDate}
-                  onChange={(newValue) => setEditData({ ...editData, advanceDate: newValue })}
-                  slotProps={{
-                    textField: { fullWidth: true }
-                  }}
-                />
-              </LocalizationProvider>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Payment Mode"
-                value={editData?.advanceType || ''}
-                onChange={(e) => setEditData({ ...editData, advanceType: e.target.value })}
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Balance Amount"
-                type="number"
-                value={editData?.balanceAmount || ''}
-                onChange={(e) => setEditData({ ...editData, balanceAmount: e.target.value })}
-              />
-            </Grid>
-          </Grid>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
-          <Button onClick={handleEditSave} color="primary">Save</Button>
-        </DialogActions>
-      </Dialog>
+      </Paper>
     </Container>
   );
 };
