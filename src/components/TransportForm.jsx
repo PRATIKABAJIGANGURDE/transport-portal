@@ -231,17 +231,6 @@ const TransportForm = () => {
 
             <Grid item xs={12} md={4}>
               <TextField
-                fullWidth
-                label="Balance Amount"
-                value={formData.balanceAmount}
-                InputProps={{
-                  readOnly: true,
-                }}
-              />
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <TextField
                 select
                 fullWidth
                 label="Balance Status"

@@ -1,17 +1,21 @@
 const mongoose = require('mongoose');
 
 const transportSchema = new mongoose.Schema({
-  date: Date,
-  vehicleNo: String,
+  date: { type: Date, required: true },
+  vehicleNo: { type: String, required: true },
   driverName: String,
   driverMobile: String,
   place: String,
   transportName: String,
-  rentAmount: Number,
-  advanceAmount: Number,
+  rentAmount: { type: Number, required: true },
+  advanceAmount: { type: Number, default: 0 },
   advanceDate: Date,
-  advanceType: String,
-  balanceAmount: Number,
+  advanceType: {
+    type: String,
+    enum: ['cash', 'phonepay'],
+    default: 'cash'
+  },
+  balanceAmount: { type: Number, default: 0 },
   balanceStatus: {
     type: String,
     enum: ['PAID', 'UNPAID'],

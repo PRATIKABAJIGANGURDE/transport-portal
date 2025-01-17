@@ -45,7 +45,7 @@ app.post('/api/transport', async (req, res) => {
     console.log('Received data:', req.body); // Debug log
 
     // Validate required fields
-    const requiredFields = ['date', 'vehicleNo', 'rentAmount', 'advanceAmount', 'advanceDate'];
+    const requiredFields = ['date', 'vehicleNo', 'rentAmount'];
     for (const field of requiredFields) {
       if (!req.body[field]) {
         return res.status(400).json({ error: `${field} is required` });
