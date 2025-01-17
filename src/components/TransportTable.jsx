@@ -225,6 +225,27 @@ const TransportTable = () => {
     )
   };
 
+  const columns = [
+    { field: 'date', headerName: 'Date', width: 120, 
+      valueFormatter: (params) => dayjs(params.value).format('DD/MM/YYYY') 
+    },
+    { field: 'vehicleNo', headerName: 'Vehicle No', width: 130 },
+    { field: 'driverName', headerName: 'Driver Name', width: 150 },
+    { field: 'driverMobile', headerName: 'Driver Mobile', width: 150 },
+    { field: 'place', headerName: 'Place', width: 150 },
+    { field: 'transportName', headerName: 'Transport Name', width: 180 },
+    { field: 'rentAmount', headerName: 'Rent Amount', width: 130 },
+    { field: 'advanceAmount', headerName: 'Advance Amount', width: 150 },
+    { field: 'advanceDate', headerName: 'Advance Date', width: 150,
+      valueFormatter: (params) => params.value ? dayjs(params.value).format('DD/MM/YYYY') : ''
+    },
+    { field: 'advanceType', headerName: 'Payment Mode', width: 150 },
+    { field: 'balanceStatus', headerName: 'Balance Status', width: 150 },
+    { field: 'balanceDate', headerName: 'Balance Date', width: 150,
+      valueFormatter: (params) => params.value ? dayjs(params.value).format('DD/MM/YYYY') : ''
+    }
+  ];
+
   return (
     <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
       {/* Stats Cards */}
